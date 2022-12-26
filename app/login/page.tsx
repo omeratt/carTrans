@@ -14,9 +14,9 @@ import {
   selectUserToken,
 } from "store/slices/userSlice";
 import { useAppDispatch, useAppSelector } from "store/hooks";
-import { postRequest } from "app/register/page";
 import useSWRMutation from "swr/mutation";
 import { json } from "node:stream/consumers";
+import { postRequest } from "pages/api/hello";
 
 interface props {
   users: UserType;

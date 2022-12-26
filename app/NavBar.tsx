@@ -3,9 +3,9 @@ import Link from "next/link";
 import React, { useEffect } from "react";
 import { useAppDispatch, useAppSelector } from "store/hooks";
 import { logout, selectUserToken } from "store/slices/userSlice";
-import { postRequest } from "./register/page";
 import useSWRMutation from "swr/mutation";
 import { redirect, useRouter } from "next/navigation";
+import { postRequest } from "pages/api/hello";
 
 function NavBar() {
   const router = useRouter();

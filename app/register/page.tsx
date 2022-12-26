@@ -9,6 +9,7 @@ import { redirect, useRouter } from "next/navigation";
 import { login, selectUserToken, UserState } from "store/slices/userSlice";
 import { useAppDispatch, useAppSelector } from "store/hooks";
 import useSWRMutation from "swr/mutation";
+import { postRequest } from "pages/api/hello";
 
 interface props {
   user: UserState;
@@ -19,16 +20,7 @@ interface FormErrors {
   password?: string;
   server?: string;
 }
-export async function postRequest(url: string, { arg }: { arg: any }) {
-  return fetch(url, {
-    headers: {
-      accept: "application/json",
-      "Content-Type": "application/json",
-    },
-    method: "POST",
-    ...(arg && { body: JSON.stringify(arg) }),
-  });
-}
+
 function Register() {
   const token = useAppSelector(selectUserToken);
   if (token) redirect("/");
