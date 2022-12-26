@@ -23,6 +23,9 @@ export interface ApiRequest extends NextApiRequest {
 
 //   };
 export async function middleware(req: Request) {
+  // if (req.nextUrl.pathname.startsWith("/users")) {
+  // This logic is only applied to /about
+
   const res = NextResponse.next();
   const accessToken: string = req.cookies.get("accessToken")?.value || "";
   const refreshToken: string = req.cookies.get("refreshToken")?.value || "";
@@ -92,8 +95,6 @@ export async function middleware(req: Request) {
           sameSite: "strict",
         });
       return res;
-      // req.cookies.set("accessToken",accessToken)
-      // req.cookies.set("refreshToken",refreshToken)
     } catch (err: any) {
       req.cookies.delete("accessToken");
       req.cookies.delete("refreshToken");
@@ -103,45 +104,15 @@ export async function middleware(req: Request) {
       return NextResponse.rewrite(new URL("/api/error", req.url));
     }
   }
+
   //   return NextResponse.rewrite(new URL("/api/auth/verify", req.url));
 }
+
 export const config = {
+  // api: {
+  //   bodyParser: {
+  //     sizeLimit: "3mb",
+  //   },
+  // },
   matcher: ["/api/users/:path*", "/dashboard/:path*"],
 };
-/*
-accessToken as string,
-    process.env.ACCESS_TOKEN_SECRET as string,
-    async (err: any, decoded: any) => {
-      console.log(decoded);
-      if (err) {
-        return NextResponse.json({
-          success: false,
-          message: "Unauthorized user",
-          err,
-        });
-        //   return await RefreshToken(req, res);
-      }
-      console.log("verify access token succeed", decoded);
-      let user = await getUserByEmail(decoded?.email);
-      if (!user) {
-        user = (await getUserById(decoded?.userId)) as UserType;
-      }
-      if (!user) {
-        return NextResponse.json({
-          success: false,
-          message: "Unauthorized user",
-          signIn: false,
-        });
-      }
-      // req["user"] = user;
-      //   return NextResponse.rewrite(new URL("/" + req.url, req.url));
-      //   return res.redirect(NextResponse.next());
-      //   return res;
-      //   NextResponse;
-      //   console.log(req.url);
-      //   return res.redirect(307, "/api/users");
-      //   return;
-      //   redirect(res, 200);
-      //   console.log(req.url);
-    }
-*/

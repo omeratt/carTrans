@@ -1,53 +1,58 @@
 "use client";
-import { UserType } from "Models/User";
 import React, { useEffect, useState } from "react";
-
+import { Dots } from "react-activity";
 import { Inter } from "@next/font/google";
 import dbConnect from "@/lib/dbConnect";
 import { getUsers } from "@/lib/services/users";
-import { useRouter } from "next/navigation";
-import { redirect } from "next/navigation";
-import {
-  login,
-  selectEmailFromRegister,
-  selectUser,
-  selectUserToken,
-} from "store/slices/userSlice";
+// import { useRouter } from "next/router";
+import { redirect, useRouter } from "next/navigation";
+import { login, selectUserToken, UserState } from "store/slices/userSlice";
 import { useAppDispatch, useAppSelector } from "store/hooks";
-import { postRequest } from "app/register/page";
 import useSWRMutation from "swr/mutation";
-import { json } from "node:stream/consumers";
 
 interface props {
-  users: UserType;
+  user: UserState;
 }
 interface FormErrors {
+  fullName?: string;
   email?: string;
   password?: string;
   server?: string;
 }
-function Login() {
-  const router = useRouter();
+export async function postRequest(url: string, { arg }: { arg: any }) {
+  return fetch(url, {
+    headers: {
+      accept: "application/json",
+      "Content-Type": "application/json",
+    },
+    method: "POST",
+    ...(arg && { body: JSON.stringify(arg) }),
+  });
+}
+function Register() {
   const token = useAppSelector(selectUserToken);
   if (token) redirect("/");
-  const dispatch = useAppDispatch();
-  const emailFromRegister = useAppSelector(selectEmailFromRegister);
-  const [email, setEmail] = useState(
-    emailFromRegister ? emailFromRegister : ""
-  );
-  const [password, setPassword] = useState("");
-  const [errors, setErrors] = useState<FormErrors>({});
   const {
-    trigger: LoginUser,
+    trigger: RegisterUser,
     data,
     error,
     isMutating,
-  } = useSWRMutation("/api/auth/signin", postRequest);
+  } = useSWRMutation("/api/auth/signup", postRequest);
+  const [fullName, setFullName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [errors, setErrors] = useState<FormErrors>({});
+  const router = useRouter();
+  const dispatch = useAppDispatch();
+  // const router = useRouter();
+  //   const token = useAppSelector(selectUserToken);
   //   console.log("asdasdasd", token);
   //   if (!token) redirect("/login");
   const validate = () => {
     const newErrors: FormErrors = {};
-
+    if (!fullName) {
+      newErrors.fullName = "FullName is required";
+    }
     if (!email) {
       newErrors.email = "Email is required";
     }
@@ -63,47 +68,55 @@ function Login() {
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     try {
-      const res = await LoginUser({ email, password });
+      const res = await RegisterUser({ email, name: fullName, password });
       const jsonRes = await res?.json();
       console.log(jsonRes);
 
       if (jsonRes.success) {
-        console.log(jsonRes.data);
-        dispatch(login({ ...jsonRes.data.user }));
-      } else {
-        console.log(jsonRes.message);
-        setErrors({ server: jsonRes.message });
+        dispatch(login({ emailFromRegister: email }));
+        router.push("/login");
       }
+      if (jsonRes.error) setErrors({ server: jsonRes.error });
       //   console.log("data", data1.data);
       //   alert(JSON.stringify(data1.data));
     } catch (err) {
       console.log("err", err);
-      console.log("error", error);
     }
-    // perform authentication here
   };
-  useEffect(() => {}, [email, password]);
-  useEffect(() => {
-    if (token) {
-      router.push("/");
-    }
-  }, [token]);
-
   return (
     <div className="h-[32rem]  grid place-content-center  ">
       <h1 className="animate__animated animate__fadeInDown text-center mb-5 text-3xl">
         Welcome to Car Trans
       </h1>
-      {emailFromRegister ? (
-        <div className="text-lime-500 animate__animated animate__fadeInDown text-center mb-5 text-xl">
-          Register Successfully
-        </div>
-      ) : null}
       <form
         onSubmit={handleSubmit}
         className="bg-white animate__animated animate__fadeIn w-[25rem] shadow-md rounded px-8 pt-6 pb-8 mb-4 flex flex-col my-2"
       >
         <div className="mb-4">
+          <label
+            className="block text-gray-700 text-sm font-bold mb-2"
+            htmlFor="fullName"
+          >
+            Full Name:
+          </label>
+          <input
+            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+            type="text"
+            id="fullName"
+            value={fullName}
+            placeholder="Full name here"
+            required
+            onChange={(event) => {
+              setFullName(event.target.value), validate();
+            }}
+          />
+          {errors.fullName && (
+            <p className="text-red-500 text-xs italic mt-2">
+              {errors.fullName}
+            </p>
+          )}
+        </div>
+        <div className="mb-6">
           <label
             className="block text-gray-700 text-sm font-bold mb-2"
             htmlFor="email"
@@ -150,12 +163,12 @@ function Login() {
             </p>
           )}
         </div>
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between  ">
           <button
             className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline flex-row flex items-center  justify-evenly"
             type="submit"
           >
-            Login
+            Register
             {isMutating && (
               <div role="status">
                 <svg
@@ -180,6 +193,7 @@ function Login() {
               </div>
             )}
           </button>
+
           {errors.server && (
             <p className="text-red-500 text-xs italic mt-2">{errors.server}</p>
           )}
@@ -189,7 +203,7 @@ function Login() {
   );
 }
 
-export default Login;
+export default Register;
 
 // function LoginForm() {
 

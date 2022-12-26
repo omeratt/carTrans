@@ -24,7 +24,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
           message: "Invalid email or password",
         });
 
-      const match = await compare(req.body.password, user.password);
+      const match = await compare(req.body.password, user.password as string);
       console.log(req.body.password != user.password);
       if (!match && req.body.password != user.password)
         return res.status(400).json({
@@ -34,11 +34,11 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
       const { password, _id, email, name, contracts } = user;
       const accessToken = generateAccessToken({
-        email,
+        email: email as string,
         userId: _id as string,
       });
       const refreshToken = generateRefreshToken({
-        email: email,
+        email: email as string,
         userId: _id as string,
       });
 
@@ -69,15 +69,15 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         success: true,
         message: "Login success",
         data: {
-          accessToken,
           refreshToken,
           user: {
+            token: accessToken,
             _id,
             email,
             name,
             contracts,
+            isSignIn: true,
           },
-          signIn: true,
         },
       });
     } catch (error: any) {

@@ -13,15 +13,12 @@ export async function createUser(user: any) {
   try {
     if (!user.email) throw new Error("Email Is Required");
     const email = user.email.toLowerCase();
-    console.log(user);
     const found = await User.findOne({ email });
-    console.log(found);
     if (found) throw new Error("Email Already Exist");
     const createdUser: UserType = await new User({
       ...user,
       email,
     });
-    console.log("sec");
     await createdUser.save();
     return createdUser;
   } catch (error: any) {

@@ -10,10 +10,11 @@ export interface UserState {
   password?: string;
   isSignIn?: boolean;
   img?: string;
-  contracts?: ContractType[];
+  contracts?: ContractState[];
   token?: string;
+  emailFromRegister?: string;
 }
-export interface ContractType {
+export interface ContractState {
   _id?: string;
   name?: string;
   done?: boolean;
@@ -25,6 +26,7 @@ const initialState: UserState = {
   _id: "",
   name: "New User",
   email: "",
+  emailFromRegister: "",
   password: "",
   img: undefined,
   isSignIn: false,
@@ -65,5 +67,7 @@ export const { setUser, login, logout } = userSlice.actions;
 export const selectUser = (state: RootState) => state.user;
 export const selectUserToken = (state: RootState) => state.user.token;
 export const selectIsSignIn = (state: RootState) => state.user.isSignIn;
+export const selectEmailFromRegister = (state: RootState) =>
+  state.user.emailFromRegister;
 
 export default userSlice.reducer;

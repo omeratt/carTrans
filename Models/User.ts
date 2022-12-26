@@ -2,9 +2,9 @@ import mongoose, { Schema, model, Document } from "mongoose";
 import { ContractType } from "./Contract";
 export interface UserType extends Document {
   _id?: string;
-  name: string;
-  email: string;
-  password: string;
+  name?: string;
+  email?: string;
+  password?: string;
   img?: string;
   contracts?: ContractType[];
 }

@@ -1,10 +1,15 @@
-import { combineReducers, configureStore } from "@reduxjs/toolkit";
-import userSlice from "./slices/userSlice";
-import { persistStore, persistReducer } from "redux-persist";
+import {
+  CombinedState,
+  combineReducers,
+  configureStore,
+} from "@reduxjs/toolkit";
+import userSlice, { UserState } from "./slices/userSlice";
+import { persistStore, persistReducer, PersistConfig } from "redux-persist";
 // import storage from "redux-persist/lib/storage"; // defaults to localStorage for web
-import storageSession from "reduxjs-toolkit-persist/lib/storage/session";
+// import storageSession from "reduxjs-toolkit-persist/lib/storage/session";
 // import { persistStore, persistReducer } from "reduxjs-toolkit-persist";
 import createWebStorage from "redux-persist/lib/storage/createWebStorage";
+// import { PersistConfig } from "reduxjs-toolkit-persist/lib/types";
 // import storage from "reduxjs-toolkit-persist/lib/storage"; // defaults to localStorage for web
 
 const createNoopStorage = () => {
@@ -27,13 +32,16 @@ const storage =
     : createNoopStorage();
 
 const persistConfig = {
-  key: "root",
+  key: "user",
   storage,
+  blacklist: ["emailFromRegister"],
 };
-const rootReducer = combineReducers({ user: userSlice });
-const persistedReducer = persistReducer(persistConfig, rootReducer);
+const persistedUser = persistReducer(persistConfig, userSlice);
+const combinedReducer = combineReducers({
+  user: persistedUser,
+});
 export const store = configureStore({
-  reducer: persistedReducer,
+  reducer: combinedReducer,
   devTools: true,
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({ serializableCheck: false }),

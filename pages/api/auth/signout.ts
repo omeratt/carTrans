@@ -33,7 +33,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       return res.json({ success: true, message: "logout successfully" });
     } catch (error: any) {
       return res.status(400).json({
-        success: false,
+        // success: false,
         message: error.message,
       });
     }
