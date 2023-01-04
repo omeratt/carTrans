@@ -6,7 +6,9 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   if (req.method === "GET") {
     try {
       const userId: string = res.getHeader("X-HEADER")?.toString() || "";
+      const userId2 = req.headers["X-HEADER"];
       console.log("userid from middleware ", userId);
+      console.log("userid2 from middleware ", userId2);
       if (!userId) return res.status(401).json("not Authorized");
 
       const data = await getContract(userId);
