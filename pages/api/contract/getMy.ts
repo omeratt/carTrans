@@ -1,18 +1,19 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import dbConnect from "@/lib/dbConnect";
 import { getContract } from "@/lib/services/contracts";
+
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   await dbConnect();
   if (req.method === "GET") {
     try {
       const userId: string = res.getHeader("X-HEADER")?.toString() || "";
-      const headers = res.getHeaders();
-
+      const headers = req.headers["x-header"];
+      console.log(global.myId);
       console.log("userid from middleware ", userId);
       console.log("headers from middleware ", headers);
-      if (!userId) return res.status(401).json("not Authorized");
+      if (!headers) return res.status(401).json("not Authorized");
 
-      const data = await getContract(userId);
+      const data = await getContract(headers as string);
       return res.status(200).json({ success: true, data });
     } catch (error: any) {
       console.log(error.message);

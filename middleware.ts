@@ -23,6 +23,9 @@ export interface ApiRequest extends NextApiRequest {
 //   ) => {
 
 //   };
+declare global {
+  var myId: any; // This must be a `var` and not a `let / const`
+}
 export async function middleware(req: Request) {
   // if (req.nextUrl.pathname.startsWith("/users")) {
   // This logic is only applied to /about
@@ -46,10 +49,21 @@ export async function middleware(req: Request) {
   try {
     const { payload } = await jwtVerify(accessToken, accessSecret);
     // console.log(payload);
-
+    global.myId = payload?.userId as string;
     res.headers.set("X-HEADER", payload?.userId as string);
     console.log("x-header", res.headers.get("X-HEADER"));
-    return res;
+
+    const requestHeaders = new Headers(req.headers);
+    requestHeaders.set("X-HEADER", payload?.userId as string);
+
+    // You can also set request headers in NextResponse.rewrite
+    const response = NextResponse.next({
+      request: {
+        // New request headers
+        headers: requestHeaders,
+      },
+    });
+    return response;
   } catch (err: any) {
     try {
       const alg = "HS256";
