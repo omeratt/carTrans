@@ -31,7 +31,7 @@ export async function middleware(req: Request) {
   const accessToken: string = req.cookies.get("accessToken")?.value || "";
   const refreshToken: string = req.cookies.get("refreshToken")?.value || "";
   console.log("access token", accessToken);
-  console.log("refresh token", refreshToken);
+  // console.log("refresh token", refreshToken);
   if (!accessToken) {
     console.log("no access token");
     return NextResponse.rewrite(new URL("/api/error", req.url));
@@ -48,6 +48,7 @@ export async function middleware(req: Request) {
     // console.log(payload);
 
     res.headers.set("X-HEADER", payload?.userId as string);
+    console.log("x-header", res.headers.get("X-HEADER"));
     return res;
   } catch (err: any) {
     try {
