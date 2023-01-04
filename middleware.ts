@@ -30,6 +30,8 @@ export async function middleware(req: Request) {
   const res = NextResponse.next();
   const accessToken: string = req.cookies.get("accessToken")?.value || "";
   const refreshToken: string = req.cookies.get("refreshToken")?.value || "";
+  console.log("access token", accessToken);
+  console.log("refresh token", refreshToken);
   if (!accessToken) {
     console.log("no access token");
     return NextResponse.rewrite(new URL("/api/error", req.url));
