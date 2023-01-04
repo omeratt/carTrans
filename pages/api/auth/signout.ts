@@ -29,6 +29,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   await dbConnect();
   if (req.method === "POST") {
     try {
+      clearCookies(req, res);
       res.statusCode = 200;
       return res.json({ success: true, message: "logout successfully" });
     } catch (error: any) {

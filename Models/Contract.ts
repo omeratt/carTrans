@@ -1,19 +1,18 @@
 import moment from "moment";
 import mongoose, { Schema, model, Document } from "mongoose";
+import { UserType } from "./User";
 export interface ContractType extends Document {
   _id?: string;
-  name?: string;
+  carBrand?: string;
   done?: boolean;
+  confirm?: boolean;
   expires?: Date;
-  details?: string;
+  from?: UserType;
+  to?: UserType;
 }
 const ContractSchema = new Schema(
   {
-    name: {
-      type: String,
-      required: true,
-    },
-    details: {
+    carBrand: {
       type: String,
       required: true,
     },
@@ -21,23 +20,27 @@ const ContractSchema = new Schema(
       type: Boolean,
       default: false,
     },
+    confirm: {
+      type: Boolean,
+      default: false,
+    },
     expires: {
       type: Date,
       default: null,
     },
-    user: {
+    from: {
       type: Schema.Types.ObjectId,
       ref: "User",
       required: true,
     },
-    targetDate: {
-      type: String,
-      required: false,
-      default: moment().format("DD/MM/YYYY"),
+    to: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
     },
   },
   { timestamps: true }
 );
 
-export default mongoose.models.Pet ||
+export default mongoose.models.Contract ||
   mongoose.model("Contract", ContractSchema);

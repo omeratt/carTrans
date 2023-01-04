@@ -16,10 +16,12 @@ export interface UserState {
 }
 export interface ContractState {
   _id?: string;
-  name?: string;
+  carBrand?: string;
   done?: boolean;
+  confirm?: boolean;
   expires?: Date;
-  details?: string;
+  from?: UserState;
+  to?: UserState;
 }
 // Define the initial state using that type
 const initialState: UserState = {

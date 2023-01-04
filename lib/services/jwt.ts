@@ -19,7 +19,7 @@ export const generateAccessToken = (user: JwtProps) => {
 };
 export const generateRefreshToken = (user: JwtProps) => {
   const refreshToken = sign(user, process.env.REFRESH_TOKEN_SECRET as string, {
-    expiresIn: "90d",
+    expiresIn: "30d",
   });
   return refreshToken;
 };

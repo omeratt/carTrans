@@ -9,6 +9,7 @@ import { persistStore, persistReducer, PersistConfig } from "redux-persist";
 // import storageSession from "reduxjs-toolkit-persist/lib/storage/session";
 // import { persistStore, persistReducer } from "reduxjs-toolkit-persist";
 import createWebStorage from "redux-persist/lib/storage/createWebStorage";
+import showSlice from "./slices/showSlice";
 // import { PersistConfig } from "reduxjs-toolkit-persist/lib/types";
 // import storage from "reduxjs-toolkit-persist/lib/storage"; // defaults to localStorage for web
 
@@ -39,6 +40,7 @@ const persistConfig = {
 const persistedUser = persistReducer(persistConfig, userSlice);
 const combinedReducer = combineReducers({
   user: persistedUser,
+  showSlice,
 });
 export const store = configureStore({
   reducer: combinedReducer,

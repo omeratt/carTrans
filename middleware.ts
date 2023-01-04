@@ -10,8 +10,9 @@ import cookie from "cookie";
 import { getCookieParser } from "next/dist/server/api-utils";
 import moment from "moment";
 import dbConnect from "./lib/dbConnect";
+import { UserState } from "store/slices/userSlice";
 export interface Request extends NextRequest {
-  user: UserType; // Replace "any" with the type of your user object
+  user: UserState; // Replace "any" with the type of your user object
 }
 export interface ApiRequest extends NextApiRequest {
   user: UserType; // Replace "any" with the type of your user object
@@ -29,7 +30,6 @@ export async function middleware(req: Request) {
   const res = NextResponse.next();
   const accessToken: string = req.cookies.get("accessToken")?.value || "";
   const refreshToken: string = req.cookies.get("refreshToken")?.value || "";
-  console.log({ accessToken, refreshToken });
   if (!accessToken) {
     console.log("no access token");
     return NextResponse.rewrite(new URL("/api/error", req.url));
@@ -43,7 +43,10 @@ export async function middleware(req: Request) {
 
   try {
     const { payload } = await jwtVerify(accessToken, accessSecret);
-    console.log(payload);
+    // console.log(payload);
+
+    res.headers.set("X-HEADER", payload?.userId as string);
+    return res;
   } catch (err: any) {
     try {
       const alg = "HS256";
@@ -73,7 +76,7 @@ export async function middleware(req: Request) {
       //   if (!user) {
       //     return NextResponse.rewrite(new URL("/api/error", req.url));
       //   }
-      //   req["user"] = user;
+      res.headers.set("X-HEADER", decoded?.userId as string);
       req.cookies.delete("accessToken");
       req.cookies.delete("refreshToken");
 
@@ -114,5 +117,5 @@ export const config = {
   //     sizeLimit: "3mb",
   //   },
   // },
-  matcher: ["/api/users/:path*", "/dashboard/:path*"],
+  matcher: ["/api/users/:path*", "/api/contract/:path*", "/dashboard/:path*"],
 };

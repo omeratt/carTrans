@@ -6,7 +6,7 @@ import { Inter } from "@next/font/google";
 import dbConnect from "../lib/dbConnect";
 import { getUsers } from "@/lib/services/users";
 // import { useRouter } from "next/router";
-import { redirect } from "next/navigation";
+import { redirect, useRouter } from "next/navigation";
 import { selectUser, selectUserToken } from "store/slices/userSlice";
 import { useAppSelector } from "store/hooks";
 interface props {
@@ -23,11 +23,15 @@ function Home() {
   // console.log(await res.json());
   // console.log(res);
 
-  // const router = useRouter();
+  const router = useRouter();
   const token = useAppSelector(selectUserToken);
   if (!token) redirect("/login");
   const user = useAppSelector(selectUser);
 
+  useEffect(() => {
+    token ? router.push("/") : router.push("/login");
+    // if (!isSignIn) redirect("/login");
+  }, [token]);
   return (
     <div className="h-[32rem]  grid place-content-center  ">
       <h1 className="animate__animated animate__fadeInDown text-center mb-5 text-3xl">

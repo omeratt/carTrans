@@ -5,8 +5,9 @@ import "../styles/globals.css";
 import "animate.css";
 import NavBar from "./NavBar";
 import { Providers } from "./provider";
+import SideBar from "./SideBar";
 
-const inter = Montserrat({ subsets: ["cyrillic"] });
+const inter = Montserrat({ subsets: ["latin-ext"] });
 export default function RootLayout({
   children,
 }: {
@@ -20,6 +21,7 @@ export default function RootLayout({
           <header>
             <NavBar />
           </header>
+          <SideBar />
           {children}
         </body>
       </html>
