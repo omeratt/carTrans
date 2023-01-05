@@ -1,4 +1,5 @@
 /** @type {import('tailwindcss').Config} */
+const defaultTheme = require("tailwindcss/defaultTheme");
 module.exports = {
   content: [
     "./node_modules/flowbite-react/**/*.js",
@@ -9,6 +10,11 @@ module.exports = {
   ],
   theme: {
     extend: {},
+    screens: {
+      phone: { min: "375px", max: "767px" },
+      // => @media (min-width: 640px and max-width: 767px) { ... }
+      ...defaultTheme.screens,
+    },
   },
   plugins: [require("flowbite/plugin")],
 };

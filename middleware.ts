@@ -33,7 +33,7 @@ export async function middleware(req: Request) {
   const res = NextResponse.next();
   const accessToken: string = req.cookies.get("accessToken")?.value || "";
   const refreshToken: string = req.cookies.get("refreshToken")?.value || "";
-  console.log("access token", accessToken);
+  // console.log("access token", accessToken);
   // console.log("refresh token", refreshToken);
   if (!accessToken) {
     console.log("no access token");
@@ -48,10 +48,8 @@ export async function middleware(req: Request) {
 
   try {
     const { payload } = await jwtVerify(accessToken, accessSecret);
-    // console.log(payload);
-    global.myId = payload?.userId as string;
-    res.headers.set("X-HEADER", payload?.userId as string);
-    console.log("x-header", res.headers.get("X-HEADER"));
+    // res.headers.set("X-HEADER", payload?.userId as string);
+    // console.log("x-header", res.headers.get("X-HEADER"));
 
     const requestHeaders = new Headers(req.headers);
     requestHeaders.set("X-HEADER", payload?.userId as string);
@@ -93,11 +91,22 @@ export async function middleware(req: Request) {
       //   if (!user) {
       //     return NextResponse.rewrite(new URL("/api/error", req.url));
       //   }
-      res.headers.set("X-HEADER", decoded?.userId as string);
+      // res.headers.set("X-HEADER", decoded?.userId as string);
+      const requestHeaders = new Headers(req.headers);
+      requestHeaders.set("X-HEADER", decoded?.userId as string);
+
+      // You can also set request headers in NextResponse.rewrite
+      const response = NextResponse.next({
+        request: {
+          // New request headers
+          headers: requestHeaders,
+        },
+      });
+
       req.cookies.delete("accessToken");
       req.cookies.delete("refreshToken");
 
-      res.cookies
+      response.cookies
         .set({
           name: "accessToken",
           value: newAccessToken,
@@ -114,7 +123,7 @@ export async function middleware(req: Request) {
           path: "/",
           sameSite: "strict",
         });
-      return res;
+      return response;
     } catch (err: any) {
       req.cookies.delete("accessToken");
       req.cookies.delete("refreshToken");

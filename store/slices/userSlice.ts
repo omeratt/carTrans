@@ -22,6 +22,7 @@ export interface ContractState {
   expires?: Date;
   from?: UserState;
   to?: UserState;
+  decline?: boolean;
 }
 // Define the initial state using that type
 const initialState: UserState = {

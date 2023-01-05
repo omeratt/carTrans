@@ -17,13 +17,13 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
           success: false,
           message: "Email is required",
         });
-      const user = await getUserByEmail(req.body.email);
+      const user = await getUserByEmail(req.body.email, true);
       if (!user)
         return res.status(400).json({
           success: false,
           message: "Invalid email or password",
         });
-
+      console.log(user.password);
       const match = await compare(req.body.password, user.password as string);
       console.log(req.body.password != user.password);
       if (!match && req.body.password != user.password)

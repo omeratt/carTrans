@@ -1,3 +1,13 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+@layer components {
+  .content_bg {
+    margin: 0 0;
+    background-image: url("../public/background.jpg");
+    height: 500px;
+    width: fit-content;
+    background-size: cover;
+    background-repeat: no-repeat;
+  }
+}

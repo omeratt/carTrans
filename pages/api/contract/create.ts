@@ -7,9 +7,9 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     try {
       const contract = req.body;
       // const data = JSON.parse(req.body);
-      const userId: string = res.getHeader("X-HEADER")?.toString() || "";
+      const userId = req.headers["x-header"] || "";
       if (!userId) return res.status(401).json("not Authorized");
-      const data = await createContract(userId, contract);
+      const data = await createContract(userId as string, contract);
       return res.status(200).json({ success: true, data });
     } catch (error: any) {
       console.log(error.message);

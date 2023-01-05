@@ -1,6 +1,6 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import dbConnect from "@/lib/dbConnect";
-import { getContract } from "@/lib/services/contracts";
+import { getPendingContract } from "@/lib/services/contracts";
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   await dbConnect();
@@ -10,7 +10,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
       if (!userId) return res.status(401).json("not Authorized");
 
-      const data = await getContract(userId as string);
+      const data = await getPendingContract(userId as string);
       return res.status(200).json({ success: true, data });
     } catch (error: any) {
       console.log(error.message);

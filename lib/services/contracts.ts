@@ -1,4 +1,4 @@
-import Contract from "Models/Contract";
+import Contract, { ContractType } from "Models/Contract";
 import User from "Models/User";
 import { ContractState } from "store/slices/userSlice";
 
@@ -36,18 +36,73 @@ export async function createContract(
 }
 export async function getContract(_id: string) {
   try {
-    const myContracts = await Contract.find({
-      $or: [
-        {
-          from: _id,
-        },
-        {
-          to: _id,
-        },
-      ],
+    const mySendingContracts: ContractType[] = await Contract.find({
+      from: _id,
     });
+    const myReceiveContracts: ContractType[] = await Contract.find({ to: _id });
 
+    return { mySendingContracts, myReceiveContracts };
+  } catch (error: any) {
+    throw new Error(error.message as string);
+  }
+}
+export async function getPendingContract(_id: string) {
+  try {
+    const Contracts: ContractType[] = await Contract.find({
+      to: _id,
+      confirm: false,
+      // decline: false,
+    }).populate([
+      {
+        path: "to",
+        select: "-password",
+      },
+      {
+        path: "from",
+        select: "-password",
+      },
+    ]);
+    const myContracts = Contracts.filter((cont) => cont.decline == false);
     return myContracts;
+  } catch (error: any) {
+    throw new Error(error.message as string);
+  }
+}
+export async function acceptContract(contractId: string) {
+  try {
+    const contract: ContractType | null = await Contract.findOneAndUpdate(
+      { _id: contractId },
+      { confirm: true }
+    );
+    if (!contract) throw new Error("contract not found");
+    const userId = contract.to?._id;
+    const contracts = await getPendingContract(userId as string);
+    return { contracts };
+  } catch (error: any) {
+    throw new Error(error.message as string);
+  }
+}
+export async function declineContract(contractId: string) {
+  try {
+    const contract: ContractType | null = await Contract.findOneAndUpdate(
+      { _id: contractId },
+      { decline: true }
+    );
+    if (!contract) throw new Error("contract not found");
+    const userId = contract.to?._id;
+    const contracts = await getPendingContract(userId as string);
+    return { contracts };
+  } catch (error: any) {
+    throw new Error(error.message as string);
+  }
+}
+export async function deleteContract(contractId: string) {
+  try {
+    const contract: ContractType | null = await Contract.findOneAndDelete({
+      _id: contractId,
+    });
+    if (!contract) throw new Error("contract not found");
+    return { contract };
   } catch (error: any) {
     throw new Error(error.message as string);
   }

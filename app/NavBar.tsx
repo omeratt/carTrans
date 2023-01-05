@@ -7,12 +7,13 @@ import useSWRMutation from "swr/mutation";
 import { redirect, useRouter } from "next/navigation";
 import { postRequest } from "pages/api/hello";
 import { Button, Navbar } from "flowbite-react";
-import { animateCSS, toggleSideBar } from "./SideBar";
+import { animateCSS, toggleAnimate } from "./SideBar";
+import Notifications from "./Components/Notifications";
 
 function NavBar() {
   const router = useRouter();
   const token = useAppSelector(selectUserToken);
-  const [isSignIn, setIsSignIn] = useState(false);
+  const [isSignIn, setIsSignIn] = useState(true);
   const [animate, setAnimate] = useState(true);
   const dispatch = useAppDispatch();
   const {
@@ -104,14 +105,19 @@ function NavBar() {
               {/* <Navbar.Link className="hover:bg-slate-600"> */}
               <Link
                 href="/create-contract"
-                className="text-white whitespace-nowrap font-normal text-lg hover:text-gray-400"
+                className="text-white whitespace-nowrap font-normal text-lg hover:text-gray-400 "
               >
                 Create Contract
               </Link>
+
               <div
                 // onClick={openSideBar}
                 onClick={() => {
-                  toggleSideBar();
+                  toggleAnimate(
+                    "aside",
+                    "animate__fadeInLeft",
+                    "animate__fadeOutLeft"
+                  );
                 }}
                 className=" text-white whitespace-nowrap font-normal text-lg cursor-pointer hover:text-gray-400"
               >
@@ -127,6 +133,9 @@ function NavBar() {
               >
                 logout
               </div>
+              {/* <Navbar.Link> */}
+              <Notifications />
+              {/* </Navbar.Link> */}
               {/* </Navbar.Link> */}
             </>
           )}

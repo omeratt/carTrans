@@ -2,15 +2,20 @@
 import React, { useEffect, useState } from "react";
 import useSWR from "swr";
 import { useAppDispatch, useAppSelector } from "store/hooks";
-import { ContractState, selectUserToken } from "store/slices/userSlice";
+import { ContractState, logout, selectUserToken } from "store/slices/userSlice";
 import LoadingSpinner from "./Components/LoadingSpinner";
+import Router from "next/router";
+import { useRouter } from "next/navigation";
+import { useDispatch } from "react-redux";
 // import { selectIsSideBar, toggleSideBar } from "store/slices/showSlice";
 const ContractElement = ({
   txt,
   pending,
+  decline,
 }: {
   txt: string;
   pending: boolean;
+  decline: boolean;
 }) => {
   return (
     <a
@@ -18,24 +23,33 @@ const ContractElement = ({
       className="flex items-center p-2 text-base font-normal text-white rounded-lg  hover:text-gray-500 group-hover:text-gray-500 hover:bg-slate-200"
     >
       <svg
-        aria-hidden="true"
         className="flex-shrink-0 w-6 h-6 text-gray-500 transition duration-75 dark:text-gray-400 hover:text-white group-hover:text-white  dark:group-hover:text-white"
-        fill="currentColor"
-        viewBox="0 0 20 20"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
         xmlns="http://www.w3.org/2000/svg"
       >
         <path
-          fillRule="evenodd"
-          d="M5 4a3 3 0 00-3 3v6a3 3 0 003 3h10a3 3 0 003-3V7a3 3 0 00-3-3H5zm-1 9v-1h5v2H5a1 1 0 01-1-1zm7 1h4a1 1 0 001-1v-1h-5v2zm0-4h5V8h-5v2zM9 8H4v2h5V8z"
-          clipRule="evenodd"
-        ></path>
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth={2}
+          d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"
+        />
       </svg>
       <span className="flex-1 ml-3 whitespace-nowrap font-normal text-lg">
         {txt}
       </span>
-      {pending && (
-        <span className="inline-flex items-center justify-center px-2 ml-3 text-xs font-medium text-gray-800 bg-red-600 rounded-full dark:bg-gray-700 dark:text-gray-300">
+      {decline ? (
+        <span className="bg-gray-700 ml-2 text-red-400 text-xs font-medium mr-2 px-2.5 py-0.5 rounded  border border-red-400">
+          Decline
+        </span>
+      ) : pending ? (
+        <span className="bg-gray-700 ml-2 text-amber-500 text-xs font-medium mr-2 px-2.5 py-0.5 rounded  border border-amber-500">
           Pending
+        </span>
+      ) : (
+        <span className="bg-gray-700 ml-2 text-lime-400 text-xs font-medium mr-2 px-2.5 py-0.5 rounded  border border-lime-400">
+          Accepted
         </span>
       )}
     </a>
@@ -75,12 +89,11 @@ export const animateCSS = (
 
     // node.addEventListener("animationend", handleAnimationEnd, { once: true });
   });
-export const toggleSideBar = () => {
-  const sideBar = document.querySelector("aside");
-  const open = "animate__fadeInLeft";
-  const close = "animate__fadeOutLeft";
-  const prefix = "animate__animated";
 
+export const toggleAnimate = (element: string, open: string, close: string) => {
+  const sideBar = document.querySelector(element);
+  const prefix = "animate__animated";
+  console.log(element, open, close);
   if (sideBar) {
     let list = sideBar?.classList.value.split(" ");
     let index: number = list?.findIndex((element) => element == prefix) || -1;
@@ -111,14 +124,16 @@ export default function SideBar() {
 }
 export function RealSideBar() {
   const { data, error, isLoading } = useSWR("/api/contract/getMy", fetcher, {
-    refreshInterval: 5000,
+    refreshInterval: 10000,
   });
-  const [contracts, setContracts] = useState(data?.data);
+  const dispatch = useAppDispatch();
+  const [mySendingContracts, setMySendingContracts] = useState([]);
+  const [myReceiveContracts, setMyReceiveContractsContracts] = useState([]);
   const CloseIcon = () => (
     <a
       // onClick={closeSideBar}
       onClick={() => {
-        toggleSideBar();
+        toggleAnimate("aside", "animate__fadeInLeft", "animate__fadeOutLeft");
       }}
       className="flex items-center p-2 text-base font-normal text-white rounded-lg  hover:text-gray-500 group-hover:text-gray-500 hover:bg-slate-200 cursor-pointer"
     >
@@ -146,33 +161,67 @@ export function RealSideBar() {
     animateCSS("aside", "fadeInLeft");
   }, []);
   useEffect(() => {
-    if (data) setContracts(data.data);
-  }, [data]);
+    if (data) {
+      if (data.status == 401) {
+        dispatch(logout());
+      }
+      setMySendingContracts(data.data?.mySendingContracts);
+      setMyReceiveContractsContracts(data.data?.myReceiveContracts);
+    }
+  }, [data, error]);
 
   return (
     <aside
       className="flex-grow absolute z-40 rounded border-transparent border-2"
       aria-label="Sidebar"
     >
-      <div className="overflow-y-auto py-4 px-3 bg-slate-700 rounded dark:bg-gray-800">
+      <div className="overflow-y-auto opacity-[0.95]  py-4 px-3 bg-slate-700 rounded dark:bg-gray-800">
         <ul className="space-y-2">
           <li>
-            <span className="p-2 text-transparent bg-clip-text bg-gradient-to-r to-orange-400 from-sky-400 hover:to-sky-200 hover:from-orange-400">
-              My Contracts
+            <div className="mb-10">
+              <span className="p-2 text-transparent bg-clip-text bg-gradient-to-r to-orange-400 from-sky-400 hover:to-sky-200 hover:from-orange-400">
+                My Sending Contracts
+              </span>
+              {isLoading && (
+                <div className="pt-6 pl-10">
+                  <LoadingSpinner />
+                </div>
+              )}
+              {mySendingContracts?.map((cont: ContractState) => (
+                <ContractElement
+                  key={cont._id}
+                  txt={"Contract " + cont.carBrand}
+                  pending={!cont.confirm}
+                  decline={cont.decline as boolean}
+                />
+              ))}
+              {!mySendingContracts && (
+                <span className="flex-1 ml-3 whitespace-nowrap text-gray-400 font-normal text-lg">
+                  No Contracts
+                </span>
+              )}
+            </div>
+            <span className="p-2 pt-[10rem] text-transparent bg-clip-text bg-gradient-to-r to-sky-400 from-orange-400 hover:to-sky-200 hover:from-orange-400">
+              My Receiving Contracts
             </span>
             {isLoading && (
               <div className="pt-6 pl-10">
                 <LoadingSpinner />
               </div>
             )}
-            {contracts &&
-              contracts.map((cont: ContractState) => (
-                <ContractElement
-                  key={cont._id}
-                  txt={"Contract " + cont.carBrand}
-                  pending={!cont.confirm}
-                />
-              ))}
+            {myReceiveContracts?.map((cont: ContractState) => (
+              <ContractElement
+                key={cont._id}
+                txt={"Contract " + cont.carBrand}
+                pending={!cont.confirm}
+                decline={cont.decline as boolean}
+              />
+            ))}
+            {!myReceiveContracts && (
+              <span className="flex-1 ml-3 whitespace-nowrap text-gray-400 font-normal text-lg">
+                No Contracts
+              </span>
+            )}
             <CloseIcon />
           </li>
         </ul>

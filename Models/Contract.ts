@@ -9,6 +9,7 @@ export interface ContractType extends Document {
   expires?: Date;
   from?: UserType;
   to?: UserType;
+  decline?: boolean;
 }
 const ContractSchema = new Schema(
   {
@@ -21,6 +22,10 @@ const ContractSchema = new Schema(
       default: false,
     },
     confirm: {
+      type: Boolean,
+      default: false,
+    },
+    decline: {
       type: Boolean,
       default: false,
     },

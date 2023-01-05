@@ -12,6 +12,9 @@ import {
   selectUserToken,
 } from "store/slices/userSlice";
 import { carBrands } from "../../constants";
+import { Toast } from "flowbite-react";
+import Image from "next/image";
+
 interface FormErrors {
   email?: string;
   carBrand?: string;
@@ -24,10 +27,13 @@ export default function CreateContract() {
   const user = useAppSelector(selectUser);
   const dispatch = useAppDispatch();
   const [email, setEmail] = useState("");
-  const [startDate, setStartDate] = useState(new Date());
+  const [sellerEmail, setSellerEmail] = useState("");
+  const [startDate, setStartDate] = useState<Date | undefined>(new Date());
   const [errors, setErrors] = useState<FormErrors>({});
   const carBrand = useRef("");
-
+  useEffect(() => {
+    if (user.email) setSellerEmail(user.email);
+  }, [user.email]);
   const {
     trigger: CreateContract,
     data,
@@ -66,6 +72,9 @@ export default function CreateContract() {
       console.log(jsonRes);
       if (jsonRes.success) {
         console.log(jsonRes.data);
+        document.querySelector(".my-toast")?.classList?.toggle("hidden");
+        setEmail("");
+        setStartDate(undefined);
         // dispatch(login({ ...jsonRes.data.user }));
       } else {
         console.log(jsonRes.message);
@@ -164,25 +173,57 @@ export default function CreateContract() {
       </div>
     );
   }
+  const Bgc = () => (
+    <Image
+      className="fixed -z-10"
+      // width={900}
+      objectFit="cover"
+      // height={900}
+      layout="fill"
+      src="/background.jpg"
+      alt="background"
+    />
+  );
   return (
-    <div className="flex w-screen h-screen overflow-x-hidden z-0 place-content-center animate__animated animate__fadeInLeft">
-      <div className="w-[50rem] h-[100%] px-10 flex-col pt-11 z-0">
+    <div className="flex w-screen  overflow-x-hidden z-10 place-content-center animate__animated animate__fadeInLeft">
+      <div className="w-[50rem] h-[100%] opacity-[0.93]  px-10 flex-col pt-11 z-0">
         <div className="mt-10 sm:mt-0">
           <div className="">
-            <div className="">
-              <div className="px-4 sm:px-0">
-                <h3 className="text-3xl mt-2 font-medium leading-6 text-gray-900">
-                  Contract Information
-                </h3>
-                <p className="mt-2 mb-2 text-lg font-medium text-gray-600">
-                  Use a permanent address where you can receive mail.
-                </p>
-              </div>
-            </div>
             <div className="mt-5 md:col-span-2 md:mt-0">
               <form>
-                <div className="overflow-hidden shadow sm:rounded-md">
-                  <div className="bg-white px-4 py-5 sm:p-6">
+                <div className="bg-white overflow-hidden  shadow-2xl sm:rounded-md">
+                  <div className="px-4 py-5">
+                    <div className="px-4 sm:px-0 ">
+                      <h3 className="text-3xl mt-2 font-medium leading-6 text-gray-900">
+                        Contract Information
+                      </h3>
+                      <p className="mt-2 mb-2 text-lg font-medium text-gray-600">
+                        Use a permanent address where you can receive mail.
+                      </p>
+                    </div>
+                    <Toast className="my-toast hidden bg-green-200 mb-2 min-w-fit">
+                      <div className="flex items-center justify-center rounded-2xl bg-green-100 text-green-500 dark:bg-green-800 dark:text-green-200">
+                        <svg
+                          className=" w-5 h-5"
+                          fill="currentColor"
+                          viewBox="0 0 20 20"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            fillRule="evenodd"
+                            d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+                            clipRule="evenodd"
+                          ></path>
+                        </svg>
+                      </div>
+                      <div className="ml-3 text-sm font-normal text-green-500">
+                        Your Contract is Successfully created!
+                      </div>
+                      <Toast.Toggle className="hover:bg-green-100 ml-2 bg-green-200" />
+                    </Toast>
+                  </div>
+                  {/* <Bgc /> */}
+                  <div className=" px-4 py-5 sm:p-6">
                     <div className="grid grid-cols-5 gap-6">
                       <div className="col-span-6 sm:col-span-4">
                         <label
@@ -193,8 +234,8 @@ export default function CreateContract() {
                         </label>
                         <input
                           type="text"
-                          value={email}
-                          placeholder={user.email}
+                          // value={sellerEmail}
+                          placeholder={sellerEmail}
                           disabled={true}
                           onChange={(event) => {
                             setEmail(event.target.value), validate();
