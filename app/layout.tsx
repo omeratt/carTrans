@@ -15,12 +15,22 @@ export default function RootLayout({
 }) {
   const Bgc = () => (
     <Image
-      className="-z-20"
+      id="myContainer"
+      className="-z-20 animate-[blur_3s_ease-in-out_both] "
       // width={900}
       objectFit="cover"
+      style={{
+        aspectRatio: 1 / 2,
+        backgroundClip: "padding-box",
+        backgroundColor: "#080710",
+        objectPosition: "50% 75%",
+
+        // backgroundColor: "#B55E4E",
+        // backgroundBlendMode: "hard-light",
+      }}
       // height={900}
       layout="fill"
-      src="/background.jpg"
+      src="/background1.png"
       alt="background"
     />
   );
@@ -30,8 +40,9 @@ export default function RootLayout({
       <html className={inter.className}>
         <head />
 
-        <body className="bg-stone-200 h-[100%]">
-          <header>
+        <body className="bg-gray-600 h-[100%] ">
+          <header className="">
+            <Bgc />
             <NavBar />
           </header>
           <SideBar />
@@ -39,8 +50,7 @@ export default function RootLayout({
             <div className="h-screen absolute -z-10">
             </div>
           </div> */}
-          {children}
-          <Bgc />
+          <div className="h-[92vh]  ">{children}</div>
         </body>
       </html>
     </Providers>

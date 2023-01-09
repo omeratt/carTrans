@@ -2,7 +2,12 @@
 import React, { useEffect, useState } from "react";
 import useSWR from "swr";
 import { useAppDispatch, useAppSelector } from "store/hooks";
-import { ContractState, logout, selectUserToken } from "store/slices/userSlice";
+import {
+  ContractState,
+  logout,
+  selectUserToken,
+  setContracts,
+} from "store/slices/userSlice";
 import LoadingSpinner from "./Components/LoadingSpinner";
 import Router from "next/router";
 import { useRouter } from "next/navigation";
@@ -12,15 +17,19 @@ const ContractElement = ({
   txt,
   pending,
   decline,
+  _id,
 }: {
   txt: string;
   pending: boolean;
   decline: boolean;
+  _id?: string;
 }) => {
+  const url = _id ? `/contract/${_id}` : "#";
+  const cursor = !_id && "cursor-default";
   return (
     <a
-      href="#"
-      className="flex items-center p-2 text-base font-normal text-white rounded-lg  hover:text-gray-500 group-hover:text-gray-500 hover:bg-slate-200"
+      href={url}
+      className={`flex items-center p-2 text-base font-normal text-white rounded-lg  hover:text-gray-500 group-hover:text-gray-500 hover:bg-slate-200 ${cursor}`}
     >
       <svg
         className="flex-shrink-0 w-6 h-6 text-gray-500 transition duration-75 dark:text-gray-400 hover:text-white group-hover:text-white  dark:group-hover:text-white"
@@ -44,7 +53,7 @@ const ContractElement = ({
           Decline
         </span>
       ) : pending ? (
-        <span className="bg-gray-700 ml-2 text-amber-500 text-xs font-medium mr-2 px-2.5 py-0.5 rounded  border border-amber-500">
+        <span className="bg-gray-700 animate-pulse ml-2 text-amber-500 text-xs font-medium mr-2 px-2.5 py-0.5 rounded  border border-amber-500">
           Pending
         </span>
       ) : (
@@ -69,7 +78,6 @@ export const animateCSS = (
     let index: number =
       list?.findIndex((element) => element == "animate__animated") || -1;
     if (~index) {
-      console.log(index);
       node?.classList.remove(list[index + 1]);
       node?.classList.add(animationName);
       //@ts-ignore
@@ -81,7 +89,6 @@ export const animateCSS = (
 
     // When the animation ends, we clean the classes and resolve the Promise
     function handleAnimationEnd(event: Event) {
-      console.log("animation end");
       event.stopPropagation();
       node?.classList.remove(`${prefix}animated`, animationName);
       resolve("Animation ended");
@@ -93,7 +100,6 @@ export const animateCSS = (
 export const toggleAnimate = (element: string, open: string, close: string) => {
   const sideBar = document.querySelector(element);
   const prefix = "animate__animated";
-  console.log(element, open, close);
   if (sideBar) {
     let list = sideBar?.classList.value.split(" ");
     let index: number = list?.findIndex((element) => element == prefix) || -1;
@@ -135,7 +141,8 @@ export function RealSideBar() {
       onClick={() => {
         toggleAnimate("aside", "animate__fadeInLeft", "animate__fadeOutLeft");
       }}
-      className="flex items-center p-2 text-base font-normal text-white rounded-lg  hover:text-gray-500 group-hover:text-gray-500 hover:bg-slate-200 cursor-pointer"
+      className="flex items-center self-center mt-1 w-fit text-base font-normal text-white rounded-lg  hover:text-gray-500 group-hover:text-gray-500 hover:bg-slate-200 cursor-pointer
+       opacity-[0.95]  py-4 px-4 bg-slate-700 "
     >
       <svg
         id="Layer_1"
@@ -153,7 +160,7 @@ export function RealSideBar() {
           d="M443.6,387.1L312.4,255.4l131.5-130c5.4-5.4,5.4-14.2,0-19.6l-37.4-37.6c-2.6-2.6-6.1-4-9.8-4c-3.7,0-7.2,1.5-9.8,4  L256,197.8L124.9,68.3c-2.6-2.6-6.1-4-9.8-4c-3.7,0-7.2,1.5-9.8,4L68,105.9c-5.4,5.4-5.4,14.2,0,19.6l131.5,130L68.4,387.1  c-2.6,2.6-4.1,6.1-4.1,9.8c0,3.7,1.4,7.2,4.1,9.8l37.4,37.6c2.7,2.7,6.2,4.1,9.8,4.1c3.5,0,7.1-1.3,9.8-4.1L256,313.1l130.7,131.1  c2.7,2.7,6.2,4.1,9.8,4.1c3.5,0,7.1-1.3,9.8-4.1l37.4-37.6c2.6-2.6,4.1-6.1,4.1-9.8C447.7,393.2,446.2,389.7,443.6,387.1z"
         />
       </svg>
-      <span className="flex-1 ml-3 whitespace-nowrap font-normal text-lg"></span>
+      <span className="flex-1  whitespace-nowrap font-normal text-lg"></span>
     </a>
   );
 
@@ -165,6 +172,12 @@ export function RealSideBar() {
       if (data.status == 401) {
         dispatch(logout());
       }
+      dispatch(
+        setContracts({
+          receive: data.data?.myReceiveContracts,
+          sending: data.data?.mySendingContracts,
+        })
+      );
       setMySendingContracts(data.data?.mySendingContracts);
       setMyReceiveContractsContracts(data.data?.myReceiveContracts);
     }
@@ -175,10 +188,10 @@ export function RealSideBar() {
       className="flex-grow absolute z-40 rounded border-transparent border-2"
       aria-label="Sidebar"
     >
-      <div className="overflow-y-auto opacity-[0.95]  py-4 px-3 bg-slate-700 rounded dark:bg-gray-800">
+      <div className="overflow-y-auto max-h-[80vh] opacity-[0.95]  py-4 px-3 bg-slate-700 rounded dark:bg-gray-800">
         <ul className="space-y-2">
           <li>
-            <div className="mb-10">
+            <div className="">
               <span className="p-2 text-transparent bg-clip-text bg-gradient-to-r to-orange-400 from-sky-400 hover:to-sky-200 hover:from-orange-400">
                 My Sending Contracts
               </span>
@@ -193,6 +206,7 @@ export function RealSideBar() {
                   txt={"Contract " + cont.carBrand}
                   pending={!cont.confirm}
                   decline={cont.decline as boolean}
+                  _id={cont._id as string}
                 />
               ))}
               {!mySendingContracts && (
@@ -201,31 +215,34 @@ export function RealSideBar() {
                 </span>
               )}
             </div>
-            <span className="p-2 pt-[10rem] text-transparent bg-clip-text bg-gradient-to-r to-sky-400 from-orange-400 hover:to-sky-200 hover:from-orange-400">
-              My Receiving Contracts
-            </span>
-            {isLoading && (
-              <div className="pt-6 pl-10">
-                <LoadingSpinner />
-              </div>
-            )}
-            {myReceiveContracts?.map((cont: ContractState) => (
-              <ContractElement
-                key={cont._id}
-                txt={"Contract " + cont.carBrand}
-                pending={!cont.confirm}
-                decline={cont.decline as boolean}
-              />
-            ))}
-            {!myReceiveContracts && (
-              <span className="flex-1 ml-3 whitespace-nowrap text-gray-400 font-normal text-lg">
-                No Contracts
+            <div>
+              <span className="p-2  text-transparent bg-clip-text bg-gradient-to-r to-sky-400 from-orange-400 hover:to-sky-200 hover:from-orange-400">
+                My Receiving Contracts
               </span>
-            )}
-            <CloseIcon />
+              {isLoading && (
+                <div className="pt-6 pl-10">
+                  <LoadingSpinner />
+                </div>
+              )}
+              {myReceiveContracts?.map((cont: ContractState) => (
+                <ContractElement
+                  key={cont._id}
+                  txt={"Contract " + cont.carBrand}
+                  pending={!cont.confirm}
+                  decline={cont.decline as boolean}
+                  // _id={cont._id as string}
+                />
+              ))}
+              {!myReceiveContracts && (
+                <span className="flex-1 ml-3 whitespace-nowrap text-gray-400 font-normal text-lg">
+                  No Contracts
+                </span>
+              )}
+            </div>
           </li>
         </ul>
       </div>
+      <CloseIcon />
     </aside>
   );
 

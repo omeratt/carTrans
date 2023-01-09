@@ -11,7 +11,7 @@ module.exports = {
   theme: {
     extend: {},
     screens: {
-      phone: { min: "375px", max: "767px" },
+      phone: { min: "280px", max: "767px" },
       // => @media (min-width: 640px and max-width: 767px) { ... }
       ...defaultTheme.screens,
     },

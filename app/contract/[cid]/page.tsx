@@ -1,14 +1,23 @@
 "use client";
-import { useRouter } from "next/navigation";
+import { redirect, useRouter } from "next/navigation";
 import { postRequest } from "pages/api/hello";
 import React, { useEffect, useRef, useState } from "react";
 import { useAppDispatch, useAppSelector } from "store/hooks";
 import useSWRMutation from "swr/mutation";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import { selectUser, selectUserToken } from "store/slices/userSlice";
-import { carBrands } from "../../constants";
+import {
+  deleteContractById,
+  selectContracts,
+  selectUser,
+  selectUserToken,
+  setSendingContract,
+} from "store/slices/userSlice";
+import { carBrands } from "../../../constants";
 import { Toast } from "flowbite-react";
+import { MyButton } from "app/Components/MyButton";
+import { setMessage } from "store/slices/showSlice";
+import moment from "moment";
 
 interface FormErrors {
   email?: string;
@@ -16,25 +25,50 @@ interface FormErrors {
   expiration?: string;
   server?: string;
 }
-export default function CreateContract() {
+type props = {
+  params: { cid: string };
+};
+export default function EditContract({ params: { cid } }: props) {
   const router = useRouter();
   const token = useAppSelector(selectUserToken);
   const user = useAppSelector(selectUser);
+  const contract = useAppSelector(selectContracts);
   const dispatch = useAppDispatch();
   const [email, setEmail] = useState("");
   const [sellerEmail, setSellerEmail] = useState("");
-  const [startDate, setStartDate] = useState<Date | undefined>(new Date());
+  const [startDate, setStartDate] = useState<Date>();
   const [errors, setErrors] = useState<FormErrors>({});
   const carBrand = useRef("");
+  let timer: NodeJS.Timeout;
   useEffect(() => {
     if (user.email) setSellerEmail(user.email);
   }, [user.email]);
-  const {
-    trigger: CreateContract,
-    data,
-    error,
-    isMutating,
-  } = useSWRMutation("/api/contract/create", postRequest);
+  useEffect(() => {
+    if (contract?.sending && contract?.sending.length > 0) {
+      let cont = contract?.sending.find((cont) => cont._id == cid);
+      setEmail(cont?.to?.email || "");
+      const exp = moment(cont?.expires).toString();
+      // const exp = new Date(cont?.expires);
+      console.log(new Date(exp));
+      setStartDate(new Date(exp));
+
+      carBrand.current = cont?.carBrand || "";
+    }
+  }, [contract?.sending.length]);
+  useEffect(() => {
+    return () => {
+      clearTimeout(timer);
+    };
+  }, []);
+  const { trigger: EditContract, isMutating: editLoading } = useSWRMutation(
+    "/api/contract/edit",
+    postRequest
+  );
+  const { trigger: DeleteContract, isMutating: deleteLoading } = useSWRMutation(
+    "/api/contract/delete",
+    postRequest
+  );
+
   //   console.log("asdasdasd", token);
   //   if (!token) redirect("/login");
   const validate = () => {
@@ -54,30 +88,69 @@ export default function CreateContract() {
 
     return Object.keys(newErrors).length === 0;
   };
-  const handleSubmit = async (event: React.MouseEvent<HTMLButtonElement>) => {
+  const handleDeleteSubmit = async (
+    event: React.MouseEvent<HTMLButtonElement>
+  ) => {
     event.preventDefault();
     try {
       console.log(carBrand.current);
-      const res = await CreateContract({
+      const res = await DeleteContract({
+        id: cid,
+      });
+      const jsonRes = await res?.json();
+      // console.log(jsonRes);
+      if (jsonRes.success) {
+        // document.querySelector(".my-toast")?.classList?.toggle("hidden");
+        dispatch(deleteContractById(cid));
+        dispatch(
+          setMessage(`Contract of ${carBrand.current} Successfully Deleted!`)
+        );
+        setStartDate(new Date());
+        router.back();
+      } else {
+        // console.log(jsonRes.error);
+        setErrors({ server: jsonRes.error });
+      }
+    } catch (err) {
+      console.log("err", err);
+    }
+    // perform authentication here
+  };
+  const handleEditSubmit = async (
+    event: React.MouseEvent<HTMLButtonElement>
+  ) => {
+    event.preventDefault();
+    try {
+      const changes = {
         to: email,
         carBrand: carBrand.current,
         expires: startDate,
+      };
+      console.log(carBrand.current);
+      const res = await EditContract({
+        id: cid,
+        ...changes,
       });
       const jsonRes = await res?.json();
       console.log(jsonRes);
       if (jsonRes.success) {
-        console.log(jsonRes.data);
         document.querySelector(".my-toast")?.classList?.toggle("hidden");
-        setEmail("");
-        setStartDate(undefined);
-        // dispatch(login({ ...jsonRes.data.user }));
+        timer = setTimeout(() => {
+          document.querySelector(".my-toast")?.classList?.toggle("hidden");
+        }, 3500);
+        dispatch(
+          setSendingContract({
+            to: { email },
+            carBrand: carBrand.current,
+            expires: startDate?.toISOString(),
+          })
+        );
       } else {
-        console.log(jsonRes.message);
-        setErrors({ server: jsonRes.message });
+        console.log(jsonRes.error);
+        setErrors({ server: jsonRes.error });
       }
     } catch (err) {
       console.log("err", err);
-      console.log("error", error);
     }
     // perform authentication here
   };
@@ -86,7 +159,7 @@ export default function CreateContract() {
     q: any;
   }
   function CarBrandsSearch({ q }: props) {
-    const [query, setQuery] = useState<string>("");
+    const [query, setQuery] = useState<string>(q.current || "");
     const [options, setOptions] = useState<string[]>(carBrands);
     const [isFocused, setIsFocused] = useState<boolean>(false);
     const [isOptionClicked, setIsOptionClicked] = useState<boolean>(false);
@@ -187,7 +260,7 @@ export default function CreateContract() {
                       </p>
                     </div>
                     <Toast className="my-toast hidden bg-green-200 mb-2 min-w-fit">
-                      <div className="flex items-center justify-center rounded-2xl bg-green-100 text-green-500 dark:bg-green-800 dark:text-green-200">
+                      <div className="flex items-center justify-center rounded-2xl bg-green-100 text-green-500 ">
                         <svg
                           className=" w-5 h-5"
                           fill="currentColor"
@@ -202,7 +275,7 @@ export default function CreateContract() {
                         </svg>
                       </div>
                       <div className="ml-3 text-sm font-normal text-green-500">
-                        Your Contract is Successfully created!
+                        Your Contract is Successfully Saved!
                       </div>
                       <Toast.Toggle className="hover:bg-green-100 ml-2 bg-green-200" />
                     </Toast>
@@ -296,37 +369,19 @@ export default function CreateContract() {
                       </div>
                     </div>
                   </div>
-                  <div className="backdrop-blur bg-gray-300/60 px-4 py-3 text-right sm:px-6">
-                    <button
-                      onClick={handleSubmit}
-                      className="inline-flex justify-center bg-slate-800/50 rounded-md border border-transparent  hover:bg-blue-700 text-white font-bold py-2 px-4  focus:outline-none focus:shadow-outline flex-row  items-center  "
-                      type="submit"
-                    >
-                      Create Contract
-                      {isMutating && (
-                        <div role="status">
-                          <svg
-                            aria-hidden="true"
-                            className=" ml-4 w-5  text-gray-200 animate-spin dark:text-gray-600 fill-white"
-                            viewBox="0 0 100 100"
-                            //   width={1000}
-                            height={25}
-                            fill="none"
-                            xmlns="http://www.w3.org/2000/svg"
-                          >
-                            <path
-                              d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z"
-                              fill="currentColor"
-                            />
-                            <path
-                              d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z"
-                              fill="currentFill"
-                            />
-                          </svg>
-                          <span className="sr-only">Loading...</span>
-                        </div>
-                      )}
-                    </button>
+                  <div className="backdrop-blur bg-gray-300/60 px-4 py-3 text-right phone:text-sm sm:px-6">
+                    <MyButton
+                      name="Save Changes"
+                      loading={editLoading}
+                      handleSubmit={handleEditSubmit}
+                      className="bg-slate-800/50 mx-1"
+                    />
+                    <MyButton
+                      name="Delete"
+                      loading={deleteLoading}
+                      handleSubmit={handleDeleteSubmit}
+                      className="bg-red-500 mx-1"
+                    />
                     {errors.server && (
                       <p className="text-red-500 text-xs italic mt-2">
                         {errors.server}
@@ -342,3 +397,10 @@ export default function CreateContract() {
     </div>
   );
 }
+
+/*
+keyS keyR => passMoney
+keyS !keyR => Cancel When Expired
+!keyS !keyR => doing nothing
+!keyS keyR => not relevant  
+*/

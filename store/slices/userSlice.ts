@@ -10,16 +10,20 @@ export interface UserState {
   password?: string;
   isSignIn?: boolean;
   img?: string;
-  contracts?: ContractState[];
+  contracts?: UserContracts;
   token?: string;
   emailFromRegister?: string;
+}
+export interface UserContracts {
+  receive: ContractState[];
+  sending: ContractState[];
 }
 export interface ContractState {
   _id?: string;
   carBrand?: string;
   done?: boolean;
   confirm?: boolean;
-  expires?: Date;
+  expires?: string;
   from?: UserState;
   to?: UserState;
   decline?: boolean;
@@ -34,21 +38,13 @@ const initialState: UserState = {
   img: undefined,
   isSignIn: false,
   token: "",
-  contracts: [],
+  contracts: undefined,
 };
 
 export const userSlice = createSlice({
   name: "user",
-  // `createSlice` will infer the state type from the `initialState` argument
   initialState,
   reducers: {
-    // increment: state => {
-    //   state.value += 1;
-    // },
-    // decrement: state => {
-    //   state.value -= 1;
-    // },
-    // Use the PayloadAction type to declare the contents of `action.payload`
     setUser: (state, action: PayloadAction<UserState>) => {
       state = { ...state, ...action.payload };
       return state;
@@ -61,10 +57,70 @@ export const userSlice = createSlice({
       state = { ...initialState };
       return state;
     },
+    setContracts: (state, action: PayloadAction<UserContracts>) => {
+      state.contracts = { ...state.contracts, ...action.payload };
+      return state;
+    },
+    setSendingContract: (state, action: PayloadAction<ContractState>) => {
+      const { _id, to, ...rest } = action.payload;
+      if (state.contracts && state.contracts.sending) {
+        const index = state.contracts.sending.findIndex(
+          (cont) => cont._id == _id
+        );
+        if (~index && state.contracts && state.contracts.sending[index]) {
+          state.contracts.sending[index] = {
+            ...state.contracts.sending[index],
+            to: { ...state.contracts.sending[index].to, email: to?.email },
+            ...rest,
+          };
+        }
+      }
+      return state;
+    },
+    deleteContractById: (state, action: PayloadAction<string>) => {
+      if (state.contracts && state.contracts.sending) {
+        const index = state.contracts.sending.findIndex(
+          (cont) => cont._id == action.payload
+        );
+        if (~index && state.contracts && state.contracts.sending[index]) {
+          state.contracts.sending.splice(index, 1);
+          console.log("deleted");
+        }
+      }
+      return state;
+    },
+    setReceivingContract: (state, action: PayloadAction<ContractState>) => {
+      const { _id, confirm, decline } = action.payload;
+      console.log(_id, confirm, decline);
+      if (state.contracts && state.contracts.receive) {
+        const index = state.contracts.receive.findIndex(
+          (cont) => cont._id == _id
+        );
+        console.log(index);
+        if (~index && state.contracts && state.contracts.receive[index]) {
+          console.log("before", state.contracts.receive[index]);
+          state.contracts.receive[index] = {
+            ...state.contracts.receive[index],
+            confirm,
+            decline,
+          };
+          console.log("after", state.contracts.receive[index]);
+        }
+      }
+      return state;
+    },
   },
 });
 
-export const { setUser, login, logout } = userSlice.actions;
+export const {
+  setUser,
+  login,
+  logout,
+  setContracts,
+  setSendingContract,
+  deleteContractById,
+  setReceivingContract,
+} = userSlice.actions;
 
 // Other code such as selectors can use the imported `RootState` type
 export const selectUser = (state: RootState) => state.user;
@@ -72,5 +128,5 @@ export const selectUserToken = (state: RootState) => state.user.token;
 export const selectIsSignIn = (state: RootState) => state.user.isSignIn;
 export const selectEmailFromRegister = (state: RootState) =>
   state.user.emailFromRegister;
-
+export const selectContracts = (state: RootState) => state.user.contracts;
 export default userSlice.reducer;

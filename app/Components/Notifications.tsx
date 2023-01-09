@@ -27,7 +27,7 @@ function Notifications() {
     error: declineContractError,
     isMutating: isMutatingDecline,
   } = useSWRMutation("/api/contract/decline", postRequest);
-  const [contracts, setContracts] = useState(data?.data);
+  const [contracts, setContracts] = useState([]);
   const declineContract = async (
     event: React.MouseEvent<HTMLButtonElement, MouseEvent>,
     contId: string
@@ -76,6 +76,7 @@ function Notifications() {
     event: React.MouseEvent<HTMLButtonElement, MouseEvent>
   ) => {
     event.preventDefault();
+    document.querySelector(".my-notification")?.classList?.toggle("hidden");
     toggleAnimate(".my-notification", "animate__zoomIn", "animate__zoomOut");
   };
   useEffect(() => {
@@ -203,7 +204,7 @@ function Notifications() {
         >
           <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z"></path>
         </svg>
-        {contracts && (
+        {contracts?.length > 0 && (
           <div className=" flex">
             <div className=" inline-flex w-6 h-6 bg-red-500 border-2 border-white rounded-full -top-2 right-3 dark:border-gray-900 justify-center align-middle text-white  pt-[0.05rem] text-sm scale-[0.85]">
               {contracts.length}
@@ -214,7 +215,7 @@ function Notifications() {
       {/* <!-- Dropdown menu --> */}
       <div
         // id="dropdownNotification"
-        className="z-20 opacity-[0.95] border-t-white border-t-[1px] right-1  absolute top-14  w-full max-w-md divide-y divide-gray-100 rounded shadow bg-slate-700  my-notification phone:top-[13.3rem]"
+        className="z-20 hidden opacity-[0.95] border-t-white border-t-[1px] right-1   absolute top-[3.6rem]  w-fit max-w-md divide-y divide-gray-100 rounded shadow bg-slate-700  my-notification phone:top-[3.8rem] phone:ml-1"
         aria-labelledby="dropdownNotificationButton"
       >
         <div className="block px-4 py-2 font-medium text-center rounded  bg-slate-700 text-white">

@@ -38,8 +38,32 @@ export async function getContract(_id: string) {
   try {
     const mySendingContracts: ContractType[] = await Contract.find({
       from: _id,
-    });
-    const myReceiveContracts: ContractType[] = await Contract.find({ to: _id });
+    })
+      .sort({ createdAt: -1 })
+      .populate([
+        {
+          path: "to",
+          select: "-password",
+        },
+        {
+          path: "from",
+          select: "-password",
+        },
+      ]);
+    const myReceiveContracts: ContractType[] = await Contract.find({
+      to: _id,
+    })
+      .sort({ createdAt: -1 })
+      .populate([
+        {
+          path: "to",
+          select: "-password",
+        },
+        {
+          path: "from",
+          select: "-password",
+        },
+      ]);
 
     return { mySendingContracts, myReceiveContracts };
   } catch (error: any) {
@@ -91,6 +115,32 @@ export async function declineContract(contractId: string) {
     if (!contract) throw new Error("contract not found");
     const userId = contract.to?._id;
     const contracts = await getPendingContract(userId as string);
+    return { contracts };
+  } catch (error: any) {
+    throw new Error(error.message as string);
+  }
+}
+export async function editContract(contractId: string, details: any) {
+  try {
+    const { to: toUserEmail, ...rest } = details;
+    if (!rest.carBrand) throw new Error("Car Brand Is Required");
+    if (!rest.expires) throw new Error("Expiration Date Is Required");
+    if (!toUserEmail) throw new Error("Buyer's Email Is Required");
+    const toEmail = toUserEmail.toLowerCase();
+
+    const to = await User.findOne({ email: toEmail });
+    if (!to) throw new Error("User Not Found!");
+    // console.log(rest, to);
+    let contract: ContractType | null = await Contract.findOneAndUpdate(
+      { _id: contractId },
+      { ...rest, to }
+    );
+    console.log(contract);
+    // if (!contract) throw new Error("contract not found");
+    // contract = { ...contract, ...rest, to: { email: to } };
+    // contract && (await contract.save());
+    const userId = contract?.from?._id;
+    const contracts = await getContract(userId as string);
     return { contracts };
   } catch (error: any) {
     throw new Error(error.message as string);

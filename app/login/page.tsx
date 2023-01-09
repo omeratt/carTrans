@@ -91,18 +91,18 @@ function Login() {
 
   return (
     <div className="h-[32rem] opacity-[0.93]  grid place-content-center  ">
-      <h1 className="animate__animated animate__fadeInDown text-center mb-5 text-3xl">
-        Welcome to Car Trans
-      </h1>
-      {emailFromRegister ? (
-        <div className="text-lime-500 animate__animated animate__fadeInDown text-center mb-5 text-xl">
-          Register Successfully
-        </div>
-      ) : null}
       <form
         onSubmit={handleSubmit}
-        className="bg-white animate__animated animate__fadeIn w-[25rem] shadow-lg rounded-lg px-8 pt-6 pb-8 mb-4 flex flex-col my-2"
+        className="backdrop-blur bg-gray-300/60 animate__animated animate__fadeIn w-[25rem] shadow-lg rounded-lg px-8 pt-6 pb-8 mb-4 flex flex-col my-2"
       >
+        <h1 className="animate__animated animate__fadeInDown  mb-5 text-3xl">
+          Welcome to Car Trans
+        </h1>
+        {emailFromRegister ? (
+          <div className="text-lime-500 animate__animated animate__fadeInDown  mb-5 text-xl">
+            Register Successfully
+          </div>
+        ) : null}
         <div className="mb-4">
           <label
             className="block text-gray-700 text-sm font-bold mb-2"
@@ -152,7 +152,7 @@ function Login() {
         </div>
         <div className="flex items-center justify-between">
           <button
-            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline flex-row flex items-center  justify-evenly"
+            className="bg-slate-800 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline flex-row flex items-center  justify-evenly"
             type="submit"
           >
             Login
