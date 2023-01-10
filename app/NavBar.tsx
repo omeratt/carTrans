@@ -63,7 +63,11 @@ function NavBar() {
           // className="mr-3 h-9 sm:h-9 w-20"
           href="/"
         >
-          <img src="/icon.png" className="mr-3 h-10" alt="CarTrans Logo" />
+          <img
+            src="/icon.png"
+            className="mr-3 h-10 animate__animated animate__fadeInRight animate__slower"
+            alt="CarTrans Logo"
+          />
           {/* <span className="self-center text-white whitespace-nowrap text-xl font-semibold dark:text-slate-400">
             CarTrans
           </span> */}

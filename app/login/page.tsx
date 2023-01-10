@@ -93,10 +93,18 @@ function Login() {
     <div className="h-[32rem] opacity-[0.93]  grid place-content-center  ">
       <form
         onSubmit={handleSubmit}
-        className="backdrop-blur bg-gray-300/60 animate__animated animate__fadeIn w-[25rem] shadow-lg rounded-lg px-8 pt-6 pb-8 mb-4 flex flex-col my-2"
+        className="backdrop-blur bg-gray-300/60 animate__animated animate__fadeIn w-[25rem] shadow-lg rounded-lg px-8 pt-6 pb-8 mb-4 flex flex-col my-2 relative"
       >
-        <h1 className="animate__animated animate__fadeInDown  mb-5 text-3xl">
-          Welcome to Car Trans
+        <h1 className="animate__animated animate__fadeInDown  mb-5 text-2xl">
+          Welcome to
+          <span className="p-2  grid-cols-2 text-transparent bg-clip-text bg-gradient-to-r to-orange-400 from-sky-400 hover:to-sky-200 hover:from-orange-400">
+            TransCar
+            <img
+              src="/icon.png"
+              className="mr-3 w-24 h-16 self-center animate__animated animate__fadeInRight animate__slower absolute right-0"
+              alt="CarTrans Logo"
+            />
+          </span>
         </h1>
         {emailFromRegister ? (
           <div className="text-lime-500 animate__animated animate__fadeInDown  mb-5 text-xl">
