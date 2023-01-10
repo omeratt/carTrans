@@ -15,7 +15,11 @@
   }
   *::-webkit-scrollbar-track {
     background-color: darkgrey;
-    border-radius: 5px;
+    /* border-radius: 5px; */
+    border: 15px solid darkgrey;
+    background-clip: content-box;
+
+    border-radius: 100px;
   }
   *::-webkit-scrollbar-thumb {
     /* background-color: #38bdf8; */

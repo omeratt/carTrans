@@ -59,20 +59,21 @@ function NavBar() {
   const Nav = () => {
     return (
       <Navbar className="bg-slate-700" fluid={true}>
-        <Navbar.Brand href="/">
-          <img
-            src="https://flowbite.com/docs/images/logo.svg"
-            className="mr-3 h-6 sm:h-9"
-            alt="CarTrans Logo"
-          />
-          <span className="self-center text-white whitespace-nowrap text-xl font-semibold dark:text-slate-400">
+        <Navbar.Brand
+          // className="mr-3 h-9 sm:h-9 w-20"
+          href="/"
+        >
+          <img src="/icon.png" className="mr-3 h-10" alt="CarTrans Logo" />
+          {/* <span className="self-center text-white whitespace-nowrap text-xl font-semibold dark:text-slate-400">
             CarTrans
-          </span>
+          </span> */}
         </Navbar.Brand>
         <div className="flex md:order-2  ">
-          <div className="flex md:w-[12vw] lg:w-[15vw] xl:w-[20vw] 2xl:w-[20vw] items-center justify-start">
-            <Notifications />
-          </div>
+          {isSignIn && (
+            <div className="flex md:w-[12vw] lg:w-[15vw] xl:w-[20vw] 2xl:w-[20vw] items-center justify-start">
+              <Notifications />
+            </div>
+          )}
           <Navbar.Toggle className="ml-3" />
         </div>
         <Navbar.Collapse>
@@ -147,53 +148,7 @@ function NavBar() {
     );
   };
 
-  return (
-    <>
-      <Nav />
-      {/* 
-      <nav className="bg-gray-800 py-4">
-        <div className="container mx-auto flex items-center justify-between px-4">
-          <Link href="/" className="text-white font-bold text-xl">
-            Home
-          </Link>
-          <div className="flex items-center">
-            {!token ? (
-              <>
-                <Link
-                  href="/login"
-                  className="mx-2 text-white hover:text-gray-400"
-                >
-                  Login
-                </Link>
-                <Link
-                  href="/register"
-                  className="mx-2 text-white hover:text-gray-400"
-                >
-                  Register
-                </Link>
-              </>
-            ) : (
-              <>
-                <Link
-                  href="/create-contract"
-                  className="mx-2 text-white hover:text-gray-400"
-                >
-                  Create Contract
-                </Link>
-                <button
-                  onClick={logOut}
-                  className="mx-2 text-white hover:text-gray-400"
-                >
-                  logout
-                </button>
-              </>
-            )}
-          </div>
-        </div>
-      </nav>
-      */}
-    </>
-  );
+  return <Nav />;
 }
 
 export default NavBar;
